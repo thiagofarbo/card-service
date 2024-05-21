@@ -42,6 +42,39 @@ func setupRouter() *gin.Engine {
 		c.JSON(http.StatusOK, gin.H{"user": user})
 	})
 
+	r.POST("/logout", func(c *gin.Context) {
+		//Delete the session
+		session := sessions.Default(c)
+		session.Clear()
+		session.Save()
+
+		var userRequest models.UserRequest
+		if err := c.BindJSON(&userRequest); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		userModel := models.User{
+			Username: userRequest.Username,
+			Password: userRequest.Password,
+		}
+
+		user, err := db.UserMatchPassword(userModel.Username, userModel.Password)
+
+		if user == nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		session = sessions.Default(c)
+
+		if session.Get("hello") != "world" {
+			session.Set("hello", "world")
+			session.Save()
+		}
+
+		c.JSON(http.StatusOK, gin.H{"user": user})
+	})
+
 	r.POST("/users", func(c *gin.Context) {
 		var userRequest models.UserRequest
 		if err := c.BindJSON(&userRequest); err != nil {
@@ -59,9 +92,10 @@ func setupRouter() *gin.Engine {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-
 		helpers.SetSession(c, user)
 		c.JSON(http.StatusCreated, gin.H{"user": user})
+
+		c.Redirect(http.StatusTemporaryRedirect, "/cards")
 	})
 
 	r.POST("/notes", func(c *gin.Context) {

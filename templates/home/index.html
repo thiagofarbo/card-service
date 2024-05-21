@@ -32,7 +32,7 @@
     }
 
     window.onload = function() {
-        const paginationLinks = generatePaginationLinks("/blogs", {{.page}}, {{.totalPages}}, {{.pageSize}});
+        const paginationLinks = generatePaginationLinks("/notes", {{.page}}, {{.totalPages}}, {{.pageSize}});
 
         const contentDiv = document.getElementById('pagination');
         contentDiv.innerHTML = paginationLinks;
@@ -54,8 +54,8 @@
         {{ range . }}
         <li>
             <div>
-                <a href="/blogs/{{.ID}}">
-                    <h5>{{ .Title }} </h5>
+                <a href="/notes/{{.ID}}">
+                    <h5>{{ .Name }} </h5>
                 </a>
                 <p>{{ .Content }}</p>
             </div>
